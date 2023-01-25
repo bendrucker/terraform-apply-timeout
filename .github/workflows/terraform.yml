@@ -58,7 +58,7 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Terraform State: `${{ matrix.signal }}`"
+            echo "## Terraform State"
             echo '```json'
             cat terraform.tfstate
             echo '```'
