@@ -1,0 +1,50 @@
+name: Terraform
+on: push
+jobs:
+  apply:
+    strategy:
+      fail-fast: false
+      matrix:
+        signal:
+          - TERM
+          - KILL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform init
+      - run: timeout --signal ${{ matrix.signal }} 10s terraform apply -auto-approve
+        continue-on-error: true
+      - uses: actions/github-script@v6
+        if: ${{ matrix.signal == 'TERM' }}
+        with:
+          github-token: test
+          script: |
+            const assert = require('assert')
+            const fs = require('fs')
+            const state = JSON.parse(fs.readFileSync('terraform.tfstate', 'utf8'))
+
+            assert.equal(state.resources.length, 1)
+            assert.equal(state.resources[0].type, 'null_resource')
+      - uses: actions/github-script@v6
+        if: ${{ matrix.signal == 'KILL' }}
+        with:
+          github-token: test
+          script: |
+            const assert = require('assert')
+            const fs = require('fs')
+            const state = JSON.parse(fs.readFileSync('terraform.tfstate', 'utf8'))
+
+            assert.equal(state.resources.length, 2)
+            assert.equal(
+              state.resources
+                .filter(r => r.type === 'null_resource')
+                .map(r => r.instances).length,
+              1
+            )
+            assert.equal(
+              state.resources
+                .filter(r => r.type === 'time_sleep')
+                .map(r => r.instances).flat().length,
+              0
+            )
