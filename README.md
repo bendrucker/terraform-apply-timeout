@@ -37,6 +37,8 @@ Upon being sent a `KILL` signal, which cannot be handled, Terraform is immediate
 
 Given the two resources in this module, `.resources[*]` has two results, but `.resources[*].instances[*]` has zero.
 
+In some test runs, the `KILL` behavior has been identical to `TERM`, suggesting that this behavior may be non-deterministic. Given that `KILL` should be immediate from the perspective of the process, this is unexpected and requires further investigation. 
+
 ## Implications
 
 Sending a `KILL` to Terraform should be avoided wherever possible, as it may cause data loss and pipeline breakage. Since the `null_resource` is a noop, the module in this repository could be re-applied without issue. In a real-world case, Terraform may be creating/destroying objects in a remote API and then failing to track those objects in state, at best creating an orphaned. For resources that have API-enforced uniqueness requirements (e.g., on a `name`), the pipeline is broken by an untracked resource creation, since a retry will fail with a conflict error.
