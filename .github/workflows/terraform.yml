@@ -24,8 +24,8 @@ jobs:
             const fs = require('fs')
             const state = JSON.parse(fs.readFileSync('terraform.tfstate', 'utf8'))
 
-            assert.equal(state.resources.length, 1)
-            assert.equal(state.resources[0].type, 'null_resource')
+            assert.equal(state.resources.length, 1, 'should have 1 resource')
+            assert.equal(state.resources[0].type, 'null_resource', 'resource should be type null_resource')
       - uses: actions/github-script@v6
         if: ${{ matrix.signal == 'KILL' }}
         with:
@@ -35,16 +35,22 @@ jobs:
             const fs = require('fs')
             const state = JSON.parse(fs.readFileSync('terraform.tfstate', 'utf8'))
 
-            assert.equal(state.resources.length, 2)
+            assert.equal(state.resources.length, 2, 'should have 2 resources')
             assert.equal(
               state.resources
                 .filter(r => r.type === 'null_resource')
-                .map(r => r.instances).length,
-              1
+                .map(r => r.instances)
+                .flat()
+                .length,
+              1,
+              'should have a null_resource instance'
             )
             assert.equal(
               state.resources
                 .filter(r => r.type === 'time_sleep')
-                .map(r => r.instances).flat().length,
-              0
+                .map(r => r.instances)
+                .flat()
+                .length,
+              0,
+              'should not have a time_sleep instance'
             )
