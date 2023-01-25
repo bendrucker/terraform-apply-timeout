@@ -54,7 +54,12 @@ jobs:
               0,
               'should not have a time_sleep instance'
             )
-      - if: always()
+      - name: Add Terraform state to job summary
+        if: always()
         run: |
-          echo "## Terraform State" >> "$GITHUB_STEP_SUMMARY"
-          cat terraform.tfstate >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Terraform State: `${{ matrix.signal }}`"
+            echo '```json'
+            cat terraform.tfstate
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
