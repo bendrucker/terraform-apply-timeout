@@ -4,6 +4,8 @@
 
 ## Reproduction
 
+The reproduction in this repository runs as an [Actions workflow](./.github/workflows/terraform.yml) on each push. It verifies that the resulting state matches the behavior described below, using a local (file) backend.
+
 ### Module
 
 The module in this repository includes:
