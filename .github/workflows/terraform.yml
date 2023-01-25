@@ -54,3 +54,7 @@ jobs:
               0,
               'should not have a time_sleep instance'
             )
+      - if: always()
+        run: |
+          echo "## Terraform State" >> "$GITHUB_STEP_SUMMARY"
+          cat terraform.tfstate >> "$GITHUB_STEP_SUMMARY"
